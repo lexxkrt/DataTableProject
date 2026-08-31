@@ -16,9 +16,14 @@
         <div class="flex items-end justify-between gap-3">
             <div class=""></div>
             <div class="">
-                <div class="inline-flex w-80 items-center gap-2">
+                <div class="relative inline-flex w-80 items-center gap-2">
                     <label for="">{{ __('Search') }}</label>
-                    <input type="text" wire:model.live.debounce="search">
+                    <input type="text" wire:model.live.debounce="search" class="pr-12!">
+                    <span class="absolute right-1 top-1/2 -translate-y-1/2" wire:click="$wire.set('search','')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                        </svg>
+                    </span>
                 </div>
             </div>
         </div>
@@ -67,7 +72,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($this->data as $row)
+                @forelse ($this->data as $row)
                     <tr>
                         @foreach ($this->columns() as $column)
                             @php
@@ -90,7 +95,11 @@
                             </td>
                         @endif
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td colspan="{{ count($this->columns()) + ($this->actions() ? 1 : 0) }}" class="text-center">{{ __('No data found') }}</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
         @if ($this->data instanceof Illuminate\Pagination\LengthAwarePaginator)

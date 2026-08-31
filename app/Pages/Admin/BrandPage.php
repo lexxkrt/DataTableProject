@@ -31,11 +31,12 @@ class BrandPage extends DataTable
 
     public function filters(): array
     {
-        return [
-            Filter::make('status')->options([
-                '1' => 'Enabled',
-                '0' => 'Disabled',
-            ]),
-;        ];
+        return [];
+        // return [
+        //     Filter::make('status')->options([
+        //         '1' => 'Enabled',
+        //         '0' => 'Disabled',
+        //     ])
+        // ];
     }
 }
