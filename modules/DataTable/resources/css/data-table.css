@@ -1,0 +1,35 @@
+.data-table {
+
+    h1 {
+        @apply text-2xl font-bold;
+    }
+
+    table {
+        @apply w-full bg-gray-100 dark:bg-gray-800;
+
+        thead {
+            tr {
+                @apply bg-gray-200 dark:bg-gray-700 border-b-2 border-gray-300 dark:border-gray-600;
+            }
+
+            th {
+                @apply px-2 py-3;
+            }
+        }
+
+        tbody {
+            tr {
+                @apply bg-white even:bg-gray-50 dark:bg-gray-700/30 even:dark:bg-gray-800 border-b border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700/50;
+            }
+
+            td {
+                @apply p-2;
+            }
+        }
+    }
+
+    input[type="text"],
+    select {
+        @apply p-2 border border-gray-400 dark:border-gray-600 dark:bg-gray-700/30 bg-white outline-none focus:ring-1 focus:ring-blue-500 w-full;
+    }
+}
