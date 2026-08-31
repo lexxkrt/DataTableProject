@@ -30,7 +30,7 @@ class DataTable extends Component
 
     public function title(): string
     {
-        return str(app($this->class)->make()->getTable())->replace('_', ' ')->title();
+        return str(app($this->class)->getTable())->replace('_', ' ')->title();
     }
 
     public function columns(): array
@@ -63,7 +63,8 @@ class DataTable extends Component
         $query = $this->query();
 
         if ($this->search) {
-            $query->where('name', 'like', '%'.$this->search.'%');
+            $searchable = collect($this->columns())->where('searchable', true)->pluck('name')->toArray();
+            $query->whereAny($searchable, 'like', '%'.$this->search.'%');
         }
 
         $query->orderBy($this->sortField, $this->sortDirection);
@@ -85,6 +86,7 @@ class DataTable extends Component
 
     public function rowAction(string $name, string $key)
     {
+        // $this->authorize('update');
         $action = collect($this->actions())->firstWhere('name', $name);
         if ($action) {
             if ($action->action instanceof Closure) {
@@ -98,21 +100,36 @@ class DataTable extends Component
         }
     }
 
+    public function columnAction(string $name, string $key)
+    {
+        // $this->authorize('update');
+        $column = collect($this->columns())->firstWhere('name', $name);
+        if ($column) {
+            if ($column->action instanceof Closure) {
+                $row = $this->query()->find($key);
+                value($column->action, $row);
+            }
+        }
+    }
+
     public function create()
     {
+        // $this->authorize('create');
         $row = $this->query()->make();
         dd($row);
     }
 
     public function edit(string $key)
     {
-        /** @var Model $row*/
+        // $this->authorize('update');
+        /** @var Model $row */
         $row = $this->query()->find($key);
         dd($row);
     }
 
     public function delete(string $key)
     {
+        // $this->authorize('delete');
         /** @var Model $row */
         $row = $this->query()->find($key);
         $row->delete();

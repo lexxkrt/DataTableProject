@@ -22,6 +22,8 @@ class BrandFactory extends Factory
         return [
             'name' => $name,
             'image' => fake_image_url(400, 400, $name),
+            'position' => fake()->numberBetween(1, 100),
+            'status' => fake()->boolean(),
         ];
     }
 }
