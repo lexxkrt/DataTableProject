@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Brand;
+use App\Models\Category;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -23,5 +24,10 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Brand::factory(100)->create();
+        Category::factory(3)->create()->each(function (Category $category) {
+            Category::factory(3, ['parent_id' => $category->id])->create()->each(function (Category $category) {
+                Category::factory(3, ['parent_id' => $category->id])->create();
+            });
+        });
     }
 }

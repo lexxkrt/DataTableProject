@@ -40,10 +40,63 @@
 
     input[type="text"],
     select {
-        @apply px-2 py-1 border border-gray-400 dark:border-gray-600 dark:bg-gray-700/30 bg-white outline-none focus:ring-1 focus:ring-blue-500 w-full;
+        @apply px-2 py-1 border border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-700/30 outline-none focus:ring-1 focus:ring-blue-500 w-full;
+
+        &.error {
+            @apply border-red-500 dark:border-red-300;
+        }
+
+        &::-webkit-scrollbar {
+            @apply w-1;
+        }
+
+        &::-webkit-scrollbar-track {
+            @apply bg-gray-600;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            @apply bg-gray-400;
+        }
+
+    }
+
+    option {
+        @apply dark:bg-gray-800 dark:text-gray-300 bg-gray-100 text-gray-700;
     }
 
     .button {
         @apply px-5 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 inline-flex items-center gap-2;
+    }
+}
+
+#modal {
+
+    input[type="text"],
+    select {
+        @apply px-2 py-1 border border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-900 outline-none focus:ring-1 focus:ring-blue-500 w-full;
+
+        &.error {
+            @apply border-red-500 dark:border-red-300;
+        }
+
+        &::-webkit-scrollbar {
+            @apply w-1;
+        }
+
+        &::-webkit-scrollbar-track {
+            @apply bg-gray-600;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            @apply bg-gray-400;
+        }
+    }
+
+    button.button {
+        @apply cursor-pointer px-5 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600;
+
+        &.secondary {
+            @apply bg-gray-500 hover:bg-gray-600;
+        }
     }
 }

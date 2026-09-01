@@ -17,8 +17,13 @@ class CategoryFactory extends Factory
      */
     public function definition(): array
     {
+        $name = str(fake()->words(3, true))->plural()->title()->value();
+
         return [
-            //
+            'name' => $name,
+            'image' => fake_image_url(400, 400, $name),
+            'position' => fake()->numberBetween(1, 100),
+            'status' => fake()->boolean(),
         ];
     }
 }

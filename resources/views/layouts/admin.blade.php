@@ -27,6 +27,7 @@
         <main class="p-5">
             {{ $slot }}
         </main>
+        <div id="modal"></div>
         <footer></footer>
     </div>
 

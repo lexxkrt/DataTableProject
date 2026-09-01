@@ -1,7 +1,10 @@
 @props(['filter'])
-<select wire:model="filters.{{ $filter->name }}" name="filter-{{ $Filter->name }}" id="Filter-{{ $filter->name }}">
-    <option value="">{{ __('All') }}</option>
-    @foreach ($filter->options as $value => $label)
-        <option value="{{ $value }}">{{ $label }}</option>
-    @endforeach
-</select>
+<div class="inline-flex items-center gap-2 transition-colors duration-500">
+    <label for="filter-{{ $filter->name }}">{{ __($filter->label) }}</label>
+    <select class="max-w-52" wire:model.live="filters.{{ $filter->name }}" name="filter-{{ $filter->name }}" id="filter-{{ $filter->name }}">
+        <option value="">{{ __('All') }}</option>
+        @foreach ($filter->options as $value => $label)
+            <option value="{{ $value }}">{!! __($label) !!}</option>
+        @endforeach
+    </select>
+</div>

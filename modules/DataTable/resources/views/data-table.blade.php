@@ -9,12 +9,16 @@
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
-                Create</button>
+                {{ __('Create') }}</button>
         </div>
     </div>
     <div class="space-y-3">
         <div class="flex items-end justify-between gap-3">
-            <div class=""></div>
+            <div class="flex flex-wrap gap-2">
+                @foreach ($this->filters() as $filter)
+                    <x-dynamic-component :component="$filter->view" :$filter />
+                @endforeach
+            </div>
             <div class="">
                 <div class="relative inline-flex w-80 items-center gap-2">
                     <label for="">{{ __('Search') }}</label>
@@ -108,4 +112,7 @@
             </div>
         @endif
     </div>
+    @teleport('#modal')
+        @include('data-table::form')
+    @endteleport
 </div>

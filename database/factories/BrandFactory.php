@@ -18,10 +18,11 @@ class BrandFactory extends Factory
     public function definition(): array
     {
         $name = str(fake()->words(3, true))->title()->value();
+        [$width, $height] = Brand::make()->imageSize();
 
         return [
             'name' => $name,
-            'image' => fake_image_url(400, 400, $name),
+            'image' => fake_image_url($width, $height, $name),
             'position' => fake()->numberBetween(1, 100),
             'status' => fake()->boolean(),
         ];

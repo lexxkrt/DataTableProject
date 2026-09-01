@@ -7,5 +7,5 @@ use Modules\DataTable\DataTable;
 
 class UserPage extends DataTable
 {
-    protected $class = User::class;
+    protected string $class = User::class;
 }

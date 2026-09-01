@@ -5,48 +5,71 @@ namespace Modules\DataTable;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use Modules\DataTable\Classes\Actions\Action;
 use Modules\DataTable\Classes\Columns\Column;
+use Modules\DataTable\Classes\Fields\Field;
+use Modules\DataTable\Classes\Layouts\Tabs;
 
 class DataTable extends Component
 {
     use WithFileUploads;
     use WithPagination;
 
-    protected $class = Model::class;
+    protected string $class = Model::class;
 
-    public $sortField = 'id';
+    public string $sortField = 'id';
 
-    public $sortDirection = 'asc';
+    public string $sortDirection = 'asc';
 
-    public $perPage = 10;
+    public int $perPage = 10;
 
-    public $search = '';
+    public string $search = '';
+
+    public array $filters = [];
+
+    /* form */
+    public ?Model $model = null;
+
+    public array $formData = [];
+
+    public array $formUploads = [];
+
+    public bool $formShow = false;
+
+    public string $formSize = 'max-w-md';
+    /* end form */
 
     public function title(): string
     {
         return str(app($this->class)->getTable())->replace('_', ' ')->title();
     }
 
+    public function formTitle(): string
+    {
+        return $this->model ? __('Edit') : __('Create');
+    }
+
     public function columns(): array
     {
-        $columns = [];
-
-        foreach (app($this->class)->getFillable() as $column) {
-            $columns[] = Column::make($column);
-        }
+        $props = app($this->class)->getFillable();
+        $columns = Arr::map($props, fn ($value) => Column::make($value));
 
         return $columns;
     }
 
-    public function fields():array
+    public function fields(): array
     {
-        return [];
+        $pros = app($this->class)->getFillable();
+        $fields = Arr::map($pros, fn ($value) => Field::make($value));
+
+        return $fields;
     }
 
     public function filters(): array
@@ -77,6 +100,8 @@ class DataTable extends Component
             $query->whereAny($searchable, 'like', '%'.$this->search.'%');
         }
 
+        $query->where(Arr::where($this->filters, fn ($value) => $value !== ''));
+
         $query->orderBy($this->sortField, $this->sortDirection);
 
         return $query->paginate($this->perPage);
@@ -88,9 +113,9 @@ class DataTable extends Component
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
             $this->sortDirection = 'asc';
+            $this->sortField = $field;
         }
 
-        $this->sortField = $field;
         $this->resetPage();
     }
 
@@ -122,19 +147,25 @@ class DataTable extends Component
         }
     }
 
+    public function updated(string $property)
+    {
+        if (! str($property)->startsWith(['form'])) {
+            $this->resetPage();
+        }
+    }
+
     public function create()
     {
         // $this->authorize('create');
-        $row = $this->query()->make();
-        dd($row);
+        $this->model = $this->query()->make();
+        $this->formOpen();
     }
 
     public function edit(string $key)
     {
         // $this->authorize('update');
-        /** @var Model $row */
-        $row = $this->query()->find($key);
-        dd($row);
+        $this->model = $this->query()->find($key);
+        $this->formOpen();
     }
 
     public function delete(string $key)
@@ -144,6 +175,78 @@ class DataTable extends Component
         $row = $this->query()->find($key);
         $row->delete();
     }
+
+    private function getFields(array $fields)
+    {
+        $results = [];
+        foreach ($fields as $field) {
+            if ($field instanceof Field) {
+                $results[$field->name] = $field;
+            } elseif ($field instanceof Tabs) {
+                foreach ($field->tabs as $tab) {
+                    $results += $this->getFields($tab->fields);
+                }
+            } elseif (isset($field->fields)) {
+                $results += $this->getFields($field->fields);
+            }
+        }
+
+        return $results;
+    }
+
+    public function store()
+    {
+        $this->resetValidation();
+        $fields = $this->getFields($this->fields());
+        $inputs = collect($fields)->filter(fn ($field) => $field->type != 'file');
+        $files = collect($fields)->filter(fn ($field) => $field->type == 'file');
+
+        $rules = collect($fields)->mapWithKeys(fn ($field) => [$field->key => $field->rules])->toArray();
+        // $messages = collect($fields)->mapWithKeys(fn ($field) => [$field->key => $field->messages])->toArray();
+        $attributes = collect($fields)->mapWithKeys(fn ($field) => [$field->key => trans($field->label)])->toArray();
+
+        $validated = $this->validate($rules, [], $attributes);
+
+        $formData = Arr::only($validated['formData'], $inputs->keys()->toArray());
+
+        $table = app($this->class)->getTable();
+
+        $files->each(function ($field) use (&$formData, $table) {
+            Arr::has($this->formData, $field->name) && blank($this->formData[$field->name]) and $formData[$field->name] = null;
+            Arr::has($this->formUploads, $field->name) and $formData[$field->name] = $this->formUploads[$field->name]->store($table, 'local');
+        });
+
+        $this->model->updateOrCreate([$this->model->getKeyName() => $this->model->getKey()], $formData);
+
+        $this->formClose();
+    }
+
+    /* form methods */
+
+    #[On('formOpen')]
+    public function formOpen()
+    {
+        $this->formData = $this->model->toArray();
+        $this->formShow = true;
+    }
+
+    #[On('formClose')]
+    public function formClose()
+    {
+        $this->resetValidation();
+        $this->reset(['formData', 'formUploads', 'formShow', 'model']);
+    }
+
+    public function formImageUrl(string $field)
+    {
+        if (Arr::has($this->formUploads, $field)) {
+            return $this->formUploads[$field]->temporaryUrl();
+        } else {
+            return $this->model?->getImage();
+        }
+    }
+
+    /* end form methods */
 
     #[Layout('layouts::admin')]
     public function render()
