@@ -4,13 +4,13 @@ namespace Modules\DataTable\Classes\Filters;
 
 class Filter
 {
-    public $view = 'data-table::filters.filter';
+    public string $view = 'data-table::filters.filter';
 
-    public $name = '';
+    public string $name = '';
 
-    public $label = '';
+    public string $label = '';
 
-    public $options = [];
+    public array $options = [];
 
     public function __construct(string $name, string $label)
     {
@@ -20,12 +20,26 @@ class Filter
 
     public static function make(string $name, string $label = '')
     {
-        empty($label) and $label = str($name)->replace('_', ' ')->title()->value();
+        empty($label) and $label = str($name)->replace(['_', '-'], ' ')->title()->value();
 
         return new static($name, $label);
     }
 
-    public function options(array $options)
+    public function view(string $view): static
+    {
+        $this->view = $view;
+
+        return $this;
+    }
+
+    public function label(string $label): static
+    {
+        $this->label = $label;
+
+        return $this;
+    }
+
+    public function options(array $options): static
     {
         $this->options = $options;
 

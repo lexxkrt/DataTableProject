@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use Modules\DataTable\Classes\Columns\Column;
 use Modules\DataTable\Classes\Columns\ColumnImage;
 use Modules\DataTable\Classes\Columns\ColumnStatus;
-use Modules\DataTable\Classes\Filters\Filter;
 use Modules\DataTable\DataTable;
 
 class BrandPage extends DataTable
@@ -32,11 +31,5 @@ class BrandPage extends DataTable
     public function filters(): array
     {
         return [];
-        // return [
-        //     Filter::make('status')->options([
-        //         '1' => 'Enabled',
-        //         '0' => 'Disabled',
-        //     ])
-        // ];
     }
 }

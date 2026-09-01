@@ -6,13 +6,15 @@ use Closure;
 
 class Action
 {
-    public $view = 'data-table::actions.action';
+    public string $view = 'data-table::actions.action';
 
-    public $name = '';
+    public string $name = '';
 
-    public $label = '';
+    public string $label = '';
 
-    public $confirm = false;
+    public bool $confirm = false;
+
+    public string $confirmMessage = '';
 
     public ?Closure $action = null;
 
@@ -24,14 +26,29 @@ class Action
 
     public static function make(string $name, string $label = '')
     {
-        empty($label) && $label = str($name)->replace('_', ' ')->title();
+        empty($label) && $label = str($name)->replace(['_', '-'], ' ')->title()->value();
 
         return new static($name, $label);
     }
 
-    public function confirm(bool $confirm = true): static
+    public function view(string $view): static
     {
-        $this->confirm = $confirm;
+        $this->view = $view;
+
+        return $this;
+    }
+
+    public function label(string $label): static
+    {
+        $this->label = $label;
+
+        return $this;
+    }
+
+    public function confirm(string $message = 'Are you sure?'): static
+    {
+        $this->confirm = true;
+        $this->confirmMessage = $message;
 
         return $this;
     }

@@ -44,6 +44,16 @@ class DataTable extends Component
         return $columns;
     }
 
+    public function fields():array
+    {
+        return [];
+    }
+
+    public function filters(): array
+    {
+        return [];
+    }
+
     public function actions(): array
     {
         return [

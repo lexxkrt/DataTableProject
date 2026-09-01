@@ -6,21 +6,21 @@ use Closure;
 
 class Column
 {
-    public $view = 'data-table::columns.column';
+    public string $view = 'data-table::columns.column';
 
-    public $name = '';
+    public string $name = '';
 
-    public $label = '';
+    public string $label = '';
 
-    public $sortable = false;
+    public bool $sortable = false;
 
-    public $searchable = false;
+    public bool $searchable = false;
 
-    public $hidden = false;
+    public bool $hidden = false;
 
-    public $width = 'auto';
+    public string $width = 'auto';
 
-    public $align = 'left';
+    public string $align = 'left';
 
     public ?Closure $value = null;
 
@@ -34,7 +34,7 @@ class Column
 
     public static function make(string $name, string $label = '')
     {
-        empty($label) && $label = str($name)->replace('_', ' ')->title();
+        empty($label) && $label = str($name)->replace(['_', '-'], ' ')->title()->value();
 
         return new static($name, $label);
     }

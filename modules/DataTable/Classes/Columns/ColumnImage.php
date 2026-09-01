@@ -4,9 +4,9 @@ namespace Modules\DataTable\Classes\Columns;
 
 class ColumnImage extends Column
 {
-    public $view = 'data-table::columns.image';
+    public string $view = 'data-table::columns.image';
 
-    public $size = 'size-10';
+    public string $size = 'size-10';
 
     public function size(string $size): static
     {
