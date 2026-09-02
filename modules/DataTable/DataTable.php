@@ -28,6 +28,8 @@ class DataTable extends Component
 
     public string $sortDirection = 'asc';
 
+    protected bool $withoutPagination = false;
+
     public int $perPage = 10;
 
     public string $search = '';
@@ -90,21 +92,63 @@ class DataTable extends Component
         return app($this->class)->query();
     }
 
+    private function getRelationTable(string $relation): string
+    {
+        return app($this->class)->{$relation}()->getRelated()->getTable();
+    }
+
+    private function getTable(): string
+    {
+        return app($this->class)->getTable();
+    }
+
+    private function getFieldName(string $field): string
+    {
+        if (str_contains($field, '.')) {
+            [$relation, $fieldName] = explode('.', $field);
+
+            return $this->getRelationTable($relation).'.'.$fieldName;
+        } else {
+            return $this->getTable().'.'.$field;
+        }
+    }
+
     #[Computed]
     public function data()
     {
         $query = $this->query();
+        $query->select($this->getTable().'.*');
+
+        $related = collect($this->columns())->where(fn ($field) => str_contains($field->name, '.'))->pluck('name')->toArray();
+        $relations = array_values(array_unique(Arr::map($related, fn ($field) => explode('.', $field)[0])));
+        Arr::map($relations, function ($relation) use ($query) {
+            $relation = app($this->class)->{$relation}();
+            $foreignKey = $relation->getForeignKeyName();
+            $related = $relation->getRelated();
+            $primaryKey = $related->getKeyName();
+            $related_table = $related->getTable();
+            $query->join($related_table, $related_table.'.'.$primaryKey, $this->getTable().'.'.$foreignKey);
+        });
 
         if ($this->search) {
             $searchable = collect($this->columns())->where('searchable', true)->pluck('name')->toArray();
-            $query->whereAny($searchable, 'like', '%'.$this->search.'%');
+            $fields = Arr::map($searchable, fn ($field) => $this->getFieldName($field));
+            $query->whereAny($fields, 'like', '%'.$this->search.'%');
         }
 
         $query->where(Arr::where($this->filters, fn ($value) => $value !== ''));
 
-        $query->orderBy($this->sortField, $this->sortDirection);
+        $field = collect($this->columns())->where('sortable', true)->firstWhere('name', $this->sortField);
+        if ($field) {
+            $query->orderBy($this->getFieldName($field->name), $this->sortDirection);
+        }
+        // $query->dumpRawSql();
 
-        return $query->paginate($this->perPage);
+        if ($this->withoutPagination) {
+            return $query->get();
+        } else {
+            return $query->paginate($this->perPage);
+        }
     }
 
     public function sortBy(string $field)
@@ -184,7 +228,9 @@ class DataTable extends Component
                 $results[$field->name] = $field;
             } elseif ($field instanceof Tabs) {
                 foreach ($field->tabs as $tab) {
-                    $results += $this->getFields($tab->fields);
+                    if (isset($tab->fields)) {
+                        $results += $this->getFields($tab->fields);
+                    }
                 }
             } elseif (isset($field->fields)) {
                 $results += $this->getFields($field->fields);
@@ -246,7 +292,19 @@ class DataTable extends Component
         }
     }
 
+    public function formImageRemove(string $field)
+    {
+        unset($this->formUploads[$field]);
+        $this->formData[$field] = null;
+        $this->model->{$field} = null;
+    }
+
     /* end form methods */
+
+    // public function paginationView()
+    // {
+    //     return 'data-table::pagination';
+    // }
 
     #[Layout('layouts::admin')]
     public function render()

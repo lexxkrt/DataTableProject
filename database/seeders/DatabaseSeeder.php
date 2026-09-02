@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -23,10 +24,12 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@admin.com',
         ]);
 
-        Brand::factory(100)->create();
+        Brand::factory(10)->create();
         Category::factory(3)->create()->each(function (Category $category) {
             Category::factory(3, ['parent_id' => $category->id])->create()->each(function (Category $category) {
-                Category::factory(3, ['parent_id' => $category->id])->create();
+                Category::factory(3, ['parent_id' => $category->id])->create()->each(function (Category $category) {
+                    Product::factory(rand(3, 5), ['category_id' => $category->id])->create();
+                });
             });
         });
     }

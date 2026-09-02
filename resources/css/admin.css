@@ -13,5 +13,5 @@
 @import "../../modules/DataTable/resources/css/data-table.css";
 
 body {
-    @apply bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300;
+    @apply bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 flex flex-col min-h-screen;
 }

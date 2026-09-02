@@ -14,20 +14,20 @@
     </div>
     <div class="space-y-3">
         <div class="flex items-end justify-between gap-3">
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-3">
                 @foreach ($this->filters() as $filter)
                     <x-dynamic-component :component="$filter->view" :$filter />
                 @endforeach
             </div>
-            <div class="">
+            <div class="flex items-end flex-wrap gap-3">
                 <div class="relative inline-flex w-80 items-center gap-2">
                     <label for="">{{ __('Search') }}</label>
                     <input type="text" wire:model.live.debounce="search" class="pr-12!">
-                    <span class="absolute right-1 top-1/2 -translate-y-1/2" wire:click="$wire.set('search','')">
+                    <button class="absolute right-1 top-1/2 -translate-y-1/2" wire:click="$wire.set('search','')">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                         </svg>
-                    </span>
+                    </button>
                 </div>
             </div>
         </div>

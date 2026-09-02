@@ -6,7 +6,7 @@ use App\Models\Category;
 use Illuminate\Database\Eloquent\Model;
 use Modules\DataTable\Classes\Columns\Column;
 use Modules\DataTable\Classes\Columns\ColumnImage;
-use Modules\DataTable\Classes\Columns\ColumnStatus;
+use Modules\DataTable\Classes\Columns\ColumnToggle;
 use Modules\DataTable\Classes\Fields\Field;
 use Modules\DataTable\Classes\Fields\FieldImage;
 use Modules\DataTable\Classes\Fields\FieldSelect;
@@ -33,8 +33,7 @@ class CategoryPage extends DataTable
             Column::make('slug')->sortable()->searchable(),
             Column::make('parent_id', 'Parent')->sortable()->searchable()->value(fn (Model $row) => $row->parent?->name),
             Column::make('position')->width('w-20')->center()->sortable()->searchable(),
-            ColumnStatus::make('status')->width('w-30')->center()->sortable()
-                ->action(fn (Model $row) => $row->update(['status' => ! $row->status])),
+            ColumnToggle::make('status')->width('w-30')->center()->sortable()->toggle(),
         ];
     }
 
