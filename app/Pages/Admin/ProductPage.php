@@ -17,6 +17,8 @@ use Modules\DataTable\Classes\Filters\Filter;
 use Modules\DataTable\Classes\Layouts\Flex;
 use Modules\DataTable\Classes\Layouts\Grid;
 use Modules\DataTable\Classes\Layouts\Section;
+use Modules\DataTable\Classes\Layouts\Tab;
+use Modules\DataTable\Classes\Layouts\Tabs;
 use Modules\DataTable\DataTable;
 
 class ProductPage extends DataTable
@@ -48,26 +50,32 @@ class ProductPage extends DataTable
     public function fields(): array
     {
         return [
-            Flex::make()->fields([
-                Section::make()->fields([
-                    FieldImage::make('image'),
-                ])->css('shrink-0')->bordered(),
-                Section::make()->fields([
-                    Field::make('name'),
-                    // Field::make('slug'),
+            Tabs::make()->tabs([
+                Tab::make('General')->fields([
+                    Flex::make()->fields([
+                        Section::make()->fields([
+                            FieldImage::make('image'),
+                        ])->css('shrink-0')->bordered(),
+                        Section::make()->fields([
+                            Field::make('name'),
+                            // Field::make('slug'),
+                            Grid::make()->fields([
+                                Field::make('quantity'),
+                                Field::make('price'),
+                            ]),
+                            Grid::make()->fields([
+                                Field::make('position'),
+                            ]),
+                            FieldToggle::make('status'),
+                        ])->css('grow')->bordered(),
+                    ]),
+                ]),
+                Tab::make('Images')->fields([
                     Section::make()->fields([
                         FieldSelect::make('brand_id', 'Brand')->options(Brand::orderBy('name')->pluck('name', 'id')->toArray()),
                         FieldSelect::make('category_id', 'Category')->options(Category::orderBy('name')->pluck('name', 'id')->toArray()),
                     ])->bordered(),
-                    Section::make()->fields([
-                        Field::make('quantity'),
-                        Field::make('price'),
-                    ])->bordered(),
-                    Grid::make()->fields([
-                        Field::make('position'),
-                    ]),
-                    FieldToggle::make('status'),
-                ])->css('grow')->bordered(),
+                ]),
             ]),
         ];
     }

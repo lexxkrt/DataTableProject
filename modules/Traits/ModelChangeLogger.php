@@ -13,10 +13,10 @@ trait ModelChangeLogger
         static::created(function (Model $model) {
             $model->logChanges($model->getAttributes(), 'created');
         });
+
         static::updated(function (Model $model) {
             $originalAttributes = $model->getOriginal();
-            $updatedAttributes = $model->getAttributes();
-            $changedAttributes = array_diff_assoc($updatedAttributes, $originalAttributes);
+            $changedAttributes = $model->getChanges();
 
             unset($changedAttributes['updated_at']);
 
@@ -34,6 +34,7 @@ trait ModelChangeLogger
 
             $model->logChanges($changes, 'updated');
         });
+
         static::deleted(function (Model $model) {
             $model->logChanges($model->getAttributes(), 'deleted');
         });

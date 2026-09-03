@@ -19,18 +19,24 @@
                     <x-dynamic-component :component="$filter->view" :$filter />
                 @endforeach
             </div>
-            <div class="flex items-end flex-wrap gap-3">
-                <div class="relative inline-flex w-80 items-center gap-2">
-                    <label for="">{{ __('Search') }}</label>
-                    <input type="text" wire:model.live.debounce="search" class="pr-12!">
-                    <button class="absolute right-1 top-1/2 -translate-y-1/2" wire:click="$wire.set('search','')">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
+            <div class="flex flex-wrap items-end gap-3">
+                @php
+                    $searchable = collect($this->columns())->where('searchable', true);
+                @endphp
+                @if ($searchable->isNotEmpty())
+                    <div class="relative inline-flex w-80 items-center gap-2">
+                        <label for="">{{ __('Search') }}</label>
+                        <input type="text" wire:model.live.debounce="search" class="pr-12!">
+                        <button class="absolute right-1 top-1/2 -translate-y-1/2" wire:click="$wire.set('search','')">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                @endif
             </div>
         </div>
+        <div class="max-w-full overflow-x-auto">
         <table>
             <thead>
                 <tr>
@@ -45,7 +51,7 @@
                         @endphp
                         <th @class([$align, $column->width, 'hidden' => $column->hidden])>
                             @if ($column->sortable)
-                                <a wire:click="sortBy('{{ $column->name }}')" class="inline-flex items-center gap-1">
+                                <a wire:click="sortBy('{{ $column->name }}')" class="inline-flex items-center gap-1 text-nowrap">
                                     @if ($column->name === $this->sortField)
                                         @if ($this->sortDirection === 'asc')
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
@@ -64,7 +70,7 @@
                                     {{ __($column->label) }}
                                 </a>
                             @else
-                                <span class="inline-flex items-center">
+                                <span class="inline-flex items-center text-nowrap">
                                     {{ __($column->label) }}
                                 </span>
                             @endif
@@ -106,6 +112,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
         @if ($this->data instanceof Illuminate\Pagination\LengthAwarePaginator)
             <div class="">
                 {{ $this->data->links() }}

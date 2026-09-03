@@ -9,6 +9,10 @@
             $value = $row->{$column->name};
         }
     }
+    if (is_array($value)) {
+        $value = json_encode($value, JSON_UNESCAPED_UNICODE);
+        $value = str_replace('","', '", "', $value);
+    }
 @endphp
 
 {{ $value }}

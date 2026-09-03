@@ -40,7 +40,7 @@
 
     input[type="text"],
     select {
-        @apply px-2 py-1 border border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-700/30 outline-none focus:ring-1 focus:ring-blue-500 w-full;
+        @apply px-2 py-1 border border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-700 outline-none focus:ring-1 focus:ring-blue-500 w-full;
 
         &.error {
             @apply border-red-500 dark:border-red-300;
@@ -61,7 +61,7 @@
     }
 
     option {
-        @apply dark:bg-gray-800 dark:text-gray-300 bg-gray-100 text-gray-700;
+        @apply dark:bg-gray-700 dark:text-gray-300 bg-gray-100 text-gray-700;
     }
 
     .button {

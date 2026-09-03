@@ -1,12 +1,12 @@
 @props(['route', 'title'])
-<a href="{{ route($route) }}" class="inline-flex items-center gap-2" title="{{ __($title) }}" wire:navigate>
+<a href="{{ route($route) }}" class="inline-flex items-center gap-2 mb-2" title="{{ __($title) }}" wire:navigate>
     @if ($slot->isNotEmpty())
         {{ $slot }}
     @else
         @php
             $icon = str($title)->substr(0, 2)->upper()->value();
         @endphp
-        <span class="">
+        <span class="size-8 flex items-center justify-center bg-white/10 rounded-lg border border-gray-500">
             {{ $icon }}
         </span>
         {{-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
