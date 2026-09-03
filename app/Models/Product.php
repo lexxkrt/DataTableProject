@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Modules\Traits\HasImage;
 use Modules\Traits\HasSlug;
 use Modules\Traits\HasUuid;
+use Modules\Traits\ModelChangeLogger;
 
 #[Fillable(['name', 'slug', 'image', 'description', 'brand_id', 'category_id', 'price', 'quantity', 'position', 'status'])]
 class Product extends Model
@@ -20,6 +21,8 @@ class Product extends Model
     use HasImage;
     use HasSlug;
     use HasUuid;
+
+    use ModelChangeLogger;
 
     protected $attributes = [
         'price' => 0,

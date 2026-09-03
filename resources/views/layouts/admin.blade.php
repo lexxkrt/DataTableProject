@@ -13,7 +13,7 @@
 </head>
 
 <body x-cloak x-data="{ darkMode: $persist(false), sidebarCollapsed: $persist(false) }" :class="darkMode && 'dark'" class="transition">
-    <aside class="fixed bottom-0 left-0 top-0 w-80 bg-gray-400 transition-all dark:bg-gray-900" :class="sidebarCollapse ? 'w-80' : 'w-12'">
+    <aside class="fixed bottom-0 left-0 top-0 bg-gray-400 transition-all dark:bg-gray-900" :class="sidebarCollapsed ? 'w-64' : 'w-12'">
         <div class="absolute right-3 top-3" x-on:click="sidebarCollapsed=!sidebarCollapsed">
             <svg x-show="sidebarCollapsed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5" />
@@ -58,7 +58,7 @@
             </button>
         </span>
     </aside>
-    <div class="flex-1 transition-all duration-300" :class="sidebarCollapsed?'ml-80':'ml-12'">
+    <div class="flex-1 transition-all duration-300" :class="sidebarCollapsed ? 'ml-64' : 'ml-12'">
         <header></header>
         <main class="p-5">
             {{ $slot }}

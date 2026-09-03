@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Traits;
+namespace Modules\Traits;
 
 use App\Models\ModelChangeLog;
 use Illuminate\Database\Eloquent\Model;

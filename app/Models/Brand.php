@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Modules\Traits\HasImage;
 use Modules\Traits\HasSlug;
 use Modules\Traits\HasUuid;
+use Modules\Traits\ModelChangeLogger;
 
 #[Fillable(['name', 'slug', 'image', 'position', 'status'])]
 class Brand extends Model
@@ -19,6 +20,8 @@ class Brand extends Model
     use HasImage;
     use HasSlug;
     use HasUuid;
+
+    use ModelChangeLogger;
 
     protected $casts = [
         'status' => 'boolean',

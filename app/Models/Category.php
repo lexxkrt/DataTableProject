@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Modules\Traits\HasImage;
 use Modules\Traits\HasSlug;
 use Modules\Traits\HasUuid;
+use Modules\Traits\ModelChangeLogger;
 
 #[Fillable(['name', 'slug', 'image', 'parent_id', 'position', 'status'])]
 class Category extends Model
@@ -19,6 +20,8 @@ class Category extends Model
     use HasImage;
     use HasSlug;
     use HasUuid;
+
+    use ModelChangeLogger;
 
     protected $casts = [
         'status' => 'boolean',
