@@ -127,7 +127,7 @@ class DataTable extends Component
             $related = $relation->getRelated();
             $primaryKey = $related->getKeyName();
             $related_table = $related->getTable();
-            $query->join($related_table, $related_table.'.'.$primaryKey, $this->getTable().'.'.$foreignKey);
+            $query->leftJoin($related_table, $related_table.'.'.$primaryKey, $this->getTable().'.'.$foreignKey);
         });
 
         if ($this->search) {

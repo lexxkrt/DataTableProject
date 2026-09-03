@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Traits\HasImage;
+use Modules\Traits\HasNullable;
 use Modules\Traits\HasSlug;
 use Modules\Traits\HasUuid;
 use Modules\Traits\ModelChangeLogger;
@@ -19,10 +20,12 @@ class Product extends Model
     use HasFactory;
 
     use HasImage;
+    use HasNullable;
     use HasSlug;
     use HasUuid;
-
     use ModelChangeLogger;
+
+    protected $nullable = ['category_id', 'brand_id'];
 
     protected $attributes = [
         'price' => 0,

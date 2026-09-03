@@ -6,6 +6,7 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Modules\DataTable\Classes\Columns\Column;
 use Modules\DataTable\Classes\Columns\ColumnImage;
 use Modules\DataTable\Classes\Columns\ColumnToggle;
@@ -33,13 +34,14 @@ class ProductPage extends DataTable
     {
         return [
             Column::make('id')->width('w-12')->center()->sortable()->searchable()->hidden(),
-            ColumnImage::make('image')->width('w-12')->center()->value(fn (Model $row) => $row->getImage()),
-            Column::make('name')->sortable()->searchable(),
+            // ColumnImage::make('image')->width('w-12')->center()->value(fn (Model $row) => $row->getImage()),
+            Column::make('name')->sortable()->searchable()->view('columns.name-with-image-and-description'),
+            // Column::make('description')->sortable()->searchable(),
             // Column::make('slug')->sortable()->searchable(),
             Column::make('brand.name', 'Brand')->sortable()->searchable(),
-            Column::make('brand.slug', 'Brand slug')->sortable()->searchable(),
+            // Column::make('brand.slug', 'Brand slug')->sortable()->searchable(),
             Column::make('category.name', 'Category')->sortable()->searchable(),
-            Column::make('category.slug', 'Category slug')->sortable()->searchable(),
+            // Column::make('category.slug', 'Category slug')->sortable()->searchable(),
             Column::make('quantity')->width('w-20')->center()->sortable()->searchable(),
             Column::make('price')->width('w-20')->center()->sortable()->searchable(),
             Column::make('position')->width('w-20')->center()->sortable()->searchable(),
@@ -72,8 +74,8 @@ class ProductPage extends DataTable
                 ]),
                 Tab::make('Images')->fields([
                     Section::make()->fields([
-                        FieldSelect::make('brand_id', 'Brand')->options(Brand::orderBy('name')->pluck('name', 'id')->toArray()),
-                        FieldSelect::make('category_id', 'Category')->options(Category::orderBy('name')->pluck('name', 'id')->toArray()),
+                        FieldSelect::make('brand_id', 'Brand')->options($this->getBrands()),
+                        FieldSelect::make('category_id', 'Category')->options($this->getCategories()),
                     ])->bordered(),
                 ]),
             ]),
@@ -84,8 +86,24 @@ class ProductPage extends DataTable
     {
         return [
             Filter::make('status')->options(['1' => 'Enabled', '0' => 'Disabled']),
-            Filter::make('category_id', 'Category')->options(Category::orderBy('name')->pluck('name', 'id')->toArray()),
-            Filter::make('brand_id', 'Brand')->options(Brand::orderBy('name')->pluck('name', 'id')->toArray()),
+            Filter::make('category_id', 'Category')->options($this->getCategories()),
+            Filter::make('brand_id', 'Brand')->options($this->getBrands()),
         ];
+    }
+
+    private function getBrands()
+    {
+        static $brands;
+        empty($brands) and $brands = Brand::orderBy('name')->pluck('name', 'id')->toArray();
+
+        return $brands;
+    }
+
+    private function getCategories()
+    {
+        static $categories;
+        empty($categories) and $categories = Cache::remember('categories', 60, fn () => Category::orderBy('name')->pluck('name', 'id')->toArray());
+
+        return $categories;
     }
 }

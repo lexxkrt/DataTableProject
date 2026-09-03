@@ -4,7 +4,7 @@
     if (is_null($value)) {
         if (str_contains($column->name, '.')) {
             [$relation, $field] = explode('.', $column->name);
-            $value = $row->{$relation}->{$field};
+            $value = $row->{$relation}?->{$field};
         } else {
             $value = $row->{$column->name};
         }

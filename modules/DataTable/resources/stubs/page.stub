@@ -1,0 +1,112 @@
+<?php
+namespace {{namespace}};
+
+use App\Models\Brand;
+use App\Models\{{model}};
+use Livewire\WithFileUploads;
+use Livewire\Attributes\Computed;
+use Lexxkrt\TablePage\Classes\BaseTable;
+use Lexxkrt\TablePage\Classes\Actions\ActionEdit;
+use Lexxkrt\TablePage\Classes\Columns\ColumnText;
+use Lexxkrt\TablePage\Classes\Columns\ColumnImage;
+use Lexxkrt\TablePage\Classes\Columns\ColumnMoney;
+use Lexxkrt\TablePage\Classes\Actions\ActionDelete;
+use Lexxkrt\TablePage\Classes\Columns\ColumnToggle;
+use Lexxkrt\TablePage\Classes\Filters\FilterSelect;
+use Lexxkrt\TablePage\Classes\Filters\FilterStatus;
+
+class {{model}}Page extends BaseTable
+{
+    //use WithFileUploads;
+
+    protected string $class = {{model}}::class;
+    public string $form_size = "md"; // md,lg,xl,2xl,3xl,5xl
+    public string $sortBy = "id"; // id, name ...etc
+
+    // public function title(): string
+    // {
+    //     return Str::title(app($this->class)->getTable());
+    // }
+
+    // public function formTitle(): string
+    // {
+    //     return $this->model?->exists ?
+    //         __('Edit `:model`', ['model' => $this->model->name]) :
+    //         __('Create new `:model`', ['model' => trans(Str::title(Str::singular(app($this->class)->getTable())))]);
+    // }
+
+    public function columns(): array
+    {
+        return [
+            // ColumnText::make('id')->sortable()->width('w-12')->center()->searchable()->hidden(),
+            // ColumnImage::make('image')->size('size-12')->width('w-20')
+            //     ->src(fn($model) => $model->image)
+            //     ->preview(fn($model) => $model->image),
+            // ColumnText::make('name')->sortable()->description(fn($model) => $model->slug)->searchable(),
+            // ColumnText::make('description')->limit(100)->searchable()->hidden(),
+            // ColumnText::make('quantity')->sortable()->center()->width('w-20'),
+            // ColumnMoney::make('price')->sortable()->sortable()->right()->second(fn($model) => $model->price * 0.9)->width('w-20'),
+            // ColumnText::make('category.name', __('Category'))->sortable(),
+            // ColumnText::make('brand.name', __('Brand'))->sortable(),
+            // ColumnText::make('created_at')->value(fn($model) => $model->created_at->format('d-m-Y'))->hidden(),
+            // ColumnText::make('updated_at')->value(fn($model) => $model->updated_at->format('d-m-Y'))->hidden(),
+            // ColumnToggle::make('status')->sortable()->width('w-20'),
+        ];
+    }
+
+    public function fields(): array
+    {
+        return [
+            // FieldInput::make('name')->rules('required'),
+            // FieldImage::make('image')->rules('nullable|image|mimes:jpeg,png,jpg'),
+            // FieldInput::make('description')->rules('required'),
+            // FieldInput::make('quantity')->rules('required|integer'),
+            // FieldInput::make('price')->rules('required|numeric'),
+            // FieldSelect::make('category_id')->options(Category::all()->pluck('name', 'id')->toArray()),
+            // FieldSelect::make('brand_id')->options(Brand::all()->pluck('name', 'id')->toArray()),
+            // FieldSelect::make('status')->options([0 => __('No'), 1 => __('Yes')]),
+        ];
+    }
+
+    // public function actions(): array
+    // {
+    //     return [
+    //         ActionEdit::make('edit'),
+    //         ActionDelete::make('delete'),
+    //     ];
+    // }
+
+    // public function with(): array
+    // {
+    //     return [
+    //         // 'brand',
+    //         // 'category',
+    //     ];
+    // }
+
+    // public function filters(): array
+    // {
+    //     return [
+    //         // 'brand_id' => FilterSelect::make('brand')->options(Brand::orderBy('name')->pluck('name', 'id')->toArray()),
+    //         //     'category_id' => FilterSelect::make('category')->options($this->categories),
+    //         //    'status' => FilterStatus::make('status'),
+    //     ];
+    // }
+
+    // #[Computed]
+    // public function brands()
+    // {
+    //     return Brand::orderBy('name')->pluck('name', 'id')->toArray();
+    // }
+
+    // #[Computed]
+    // public function categories()
+    // {
+    //     // return Category::orderBy('name')->pluck('name', 'id')->toArray();
+    // }
+
+    // public function render()
+    // {
+    //     return view('table-page::table');
+    // }
+}
