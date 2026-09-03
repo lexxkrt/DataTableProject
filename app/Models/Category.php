@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Traits\HasImage;
+use Modules\Traits\HasNullable;
 use Modules\Traits\HasSlug;
 use Modules\Traits\HasUuid;
 use Modules\Traits\ModelChangeLogger;
@@ -20,9 +21,11 @@ class Category extends Model
     use HasImage;
     use HasSlug;
     use HasUuid;
+    use HasNullable;
 
     use ModelChangeLogger;
 
+    protected $nullable = ['parent_id'];
     protected $casts = [
         'status' => 'boolean',
     ];
