@@ -49,6 +49,7 @@
                 <li><x-admin.side-link route="admin.brands" title="{{ __('Brands') }}" /></li>
                 <li><x-admin.side-link route="admin.categories" title="{{ __('Categories') }}" /></li>
                 <li><x-admin.side-link route="admin.products" title="{{ __('Products') }}" /></li>
+                <li><x-admin.side-link route="admin.logs" title="{{ __('Logs') }}" /></li>
             </ul>
         </div>
 

@@ -8,7 +8,7 @@ use App\Pages\Admin\UserPage;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->as('admin.')->group(function () {
-    Route::get('', UserPage::class)->name('dashboard');
+    Route::get('/', UserPage::class)->name('dashboard');
     Route::get('users', UserPage::class)->name('users');
     Route::get('brands', BrandPage::class)->name('brands');
     Route::get('categories', CategoryPage::class)->name('categories');

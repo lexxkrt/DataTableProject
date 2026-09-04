@@ -16,6 +16,7 @@ use Modules\DataTable\Classes\Actions\Action;
 use Modules\DataTable\Classes\Columns\Column;
 use Modules\DataTable\Classes\Fields\Field;
 use Modules\DataTable\Classes\Layouts\Tabs;
+use Modules\DataTable\Classes\Relations\Relation;
 
 class DataTable extends Component
 {
@@ -42,6 +43,8 @@ class DataTable extends Component
     public array $formData = [];
 
     public array $formUploads = [];
+
+    public array $formRelations = [];
 
     public bool $formShow = false;
 
@@ -151,7 +154,7 @@ class DataTable extends Component
         }
     }
 
-    public function sortBy(string $field)
+    public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
@@ -163,7 +166,7 @@ class DataTable extends Component
         $this->resetPage();
     }
 
-    public function rowAction(string $name, string $key)
+    public function rowAction(string $name, string $key): void
     {
         // $this->authorize('update');
         $action = collect($this->actions())->firstWhere('name', $name);
@@ -179,7 +182,7 @@ class DataTable extends Component
         }
     }
 
-    public function columnAction(string $name, string $key)
+    public function columnAction(string $name, string $key): void
     {
         // $this->authorize('update');
         $column = collect($this->columns())->firstWhere('name', $name);
@@ -191,28 +194,28 @@ class DataTable extends Component
         }
     }
 
-    public function updated(string $property)
+    public function updated(string $property): void
     {
         if (! str($property)->startsWith(['form'])) {
             $this->resetPage();
         }
     }
 
-    public function create()
+    public function create(): void
     {
         // $this->authorize('create');
         $this->model = $this->query()->make();
         $this->formOpen();
     }
 
-    public function edit(string $key)
+    public function edit(string $key): void
     {
         // $this->authorize('update');
         $this->model = $this->query()->find($key);
         $this->formOpen();
     }
 
-    public function delete(string $key)
+    public function delete(string $key): void
     {
         // $this->authorize('delete');
         /** @var Model $row */
@@ -220,7 +223,25 @@ class DataTable extends Component
         $row->delete();
     }
 
-    private function getFields(array $fields)
+    private function getRelations(array $fields): array
+    {
+        $results = [];
+        foreach ($fields as $field) {
+            if ($field instanceof Relation) {
+                $results[$field->name] = $field;
+            } elseif ($field instanceof Tabs) {
+                foreach ($field->tabs as $tab) {
+                    $results += $this->getRelations($tab->fields);
+                }
+            } elseif (isset($field->fields)) {
+                $results += $this->getRelations($field->fields);
+            }
+        }
+
+        return $results;
+    }
+
+    private function getFields(array $fields): array
     {
         $results = [];
         foreach ($fields as $field) {
@@ -264,6 +285,52 @@ class DataTable extends Component
 
         $this->model->updateOrCreate([$this->model->getKeyName() => $this->model->getKey()], $formData);
 
+        $relations = $this->getRelations($this->fields());
+
+        foreach ($relations as $relation) {
+            $data = $this->formRelations[$relation->name];
+            $original = $this->model->{$relation->name}->toArray();
+
+            // $ids_data = collect($data)->pluck('id');
+            $ids_original = collect($original)->pluck('id');
+
+            // $diff = $ids_original->diff($ids_data);
+            // $this->model->{$relation->name}()->find($diff)->each(fn ($item) => $item->delete());
+
+            $changed = array_udiff($data, $original,
+                function ($a, $b) {
+                    return array_udiff($a, $b, fn ($a, $b) => strcmp($a, $b));
+                });
+            // dd($data, $original, $changed);
+            // fn($a, $b) => strcmp($a, $b));
+            // dd($changed);
+
+            // foreach ($changed as $item) {
+            //     $this->model->{$relation->name}()->updateOrCreate(Arr::only($item, 'id'), $item);
+            // }
+
+            // $this->model->{$relation->name}()->delete([]);
+            // $ids = collect($changed)->where(fn ($item) => isset($item['id'])); // ->map(fn ($item) => $item['id']);
+            // ->map(fn ($item) => $item['id'])->toArray();
+            // dd($ids->toArray(), $changed);
+            // Arr::where($changed, fn ($item) => isset($item['id']))
+            // $ids = Arr::map($changed, function ($item) {
+            //     return $item['id'];
+            // });
+            // $ids = collect($changed)->map(function ($item) {
+            //     return $item['id'];
+            // });
+            // $ids = Arr::only($changed, ['id']);
+            // $this->model->{$relation->name}()->each(fn ($item) => $item->delete());
+            $this->model->{$relation->name}()->delete();
+            $this->model->{$relation->name}()->createMany($changed);
+            // if ($relation->type == 'belongsTo') {
+            //     $data[$relation->related->getKeyName()] = $this->model->{$relation->related->getForeignKeyName()};
+            // }
+            // $this->model->{$relation->name}()
+            //     ->updateOrCreate(Arr::only($data, [$this->model->{$relation->name}()->getKeyName()]), $data ?? []);
+        }
+
         $this->formClose();
     }
 
@@ -273,6 +340,10 @@ class DataTable extends Component
     public function formOpen()
     {
         $this->formData = $this->model->toArray();
+        $this->formUploads = [];
+        foreach ($this->getRelations($this->fields()) as $relation) {
+            $this->formRelations[$relation->name] = $this->model?->{$relation->name}->toArray();
+        }
         $this->formShow = true;
     }
 
@@ -297,6 +368,16 @@ class DataTable extends Component
         unset($this->formUploads[$field]);
         $this->formData[$field] = null;
         $this->model->{$field} = null;
+    }
+
+    public function addRelation(string $relation)
+    {
+        $this->formRelations[$relation][] = [];
+    }
+
+    public function removeRelation(string $relation, int $index)
+    {
+        unset($this->formRelations[$relation][$index]);
     }
 
     /* end form methods */

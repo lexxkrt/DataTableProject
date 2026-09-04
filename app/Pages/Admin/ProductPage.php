@@ -20,6 +20,7 @@ use Modules\DataTable\Classes\Layouts\Grid;
 use Modules\DataTable\Classes\Layouts\Section;
 use Modules\DataTable\Classes\Layouts\Tab;
 use Modules\DataTable\Classes\Layouts\Tabs;
+use Modules\DataTable\Classes\Relations\Relation;
 use Modules\DataTable\DataTable;
 
 class ProductPage extends DataTable
@@ -61,6 +62,10 @@ class ProductPage extends DataTable
                         Section::make()->fields([
                             Field::make('name'),
                             // Field::make('slug'),
+                            Section::make()->fields([
+                                FieldSelect::make('brand_id', 'Brand')->options($this->getBrands()),
+                                FieldSelect::make('category_id', 'Category')->options($this->getCategories()),
+                            ])->bordered(),
                             Grid::make()->fields([
                                 Field::make('quantity'),
                                 Field::make('price'),
@@ -73,10 +78,10 @@ class ProductPage extends DataTable
                     ]),
                 ]),
                 Tab::make('Images')->fields([
-                    Section::make()->fields([
-                        FieldSelect::make('brand_id', 'Brand')->options($this->getBrands()),
-                        FieldSelect::make('category_id', 'Category')->options($this->getCategories()),
-                    ])->bordered(),
+                    Relation::make('images')->fields([
+                        'image',
+                        'position',
+                    ]),
                 ]),
             ]),
         ];
