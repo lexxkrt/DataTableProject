@@ -288,47 +288,26 @@ class DataTable extends Component
         $relations = $this->getRelations($this->fields());
 
         foreach ($relations as $relation) {
+            $keyName = app($this->class)->{$relation->name}()->getRelated()->getKeyName();
+
             $data = $this->formRelations[$relation->name];
             $original = $this->model->{$relation->name}->toArray();
 
-            // $ids_data = collect($data)->pluck('id');
-            $ids_original = collect($original)->pluck('id');
+            $ids_data = collect($data)->pluck($keyName);
+            $ids_original = collect($original)->pluck($keyName);
+            $deleted = $ids_original->diff($ids_data);
+            $created = collect($data)->whereNull('id');
+            $changed = collect($data)->whereNotNull('id');
 
-            // $diff = $ids_original->diff($ids_data);
-            // $this->model->{$relation->name}()->find($diff)->each(fn ($item) => $item->delete());
+            $this->model->{$relation->name}()->find($deleted->toArray())->each(function ($item) {
+                $item->delete();
+            });
 
-            $changed = array_udiff($data, $original,
-                function ($a, $b) {
-                    return array_udiff($a, $b, fn ($a, $b) => strcmp($a, $b));
-                });
-            // dd($data, $original, $changed);
-            // fn($a, $b) => strcmp($a, $b));
-            // dd($changed);
+            $this->model->{$relation->name}()->createMany($created->toArray());
 
-            // foreach ($changed as $item) {
-            //     $this->model->{$relation->name}()->updateOrCreate(Arr::only($item, 'id'), $item);
-            // }
-
-            // $this->model->{$relation->name}()->delete([]);
-            // $ids = collect($changed)->where(fn ($item) => isset($item['id'])); // ->map(fn ($item) => $item['id']);
-            // ->map(fn ($item) => $item['id'])->toArray();
-            // dd($ids->toArray(), $changed);
-            // Arr::where($changed, fn ($item) => isset($item['id']))
-            // $ids = Arr::map($changed, function ($item) {
-            //     return $item['id'];
-            // });
-            // $ids = collect($changed)->map(function ($item) {
-            //     return $item['id'];
-            // });
-            // $ids = Arr::only($changed, ['id']);
-            // $this->model->{$relation->name}()->each(fn ($item) => $item->delete());
-            $this->model->{$relation->name}()->delete();
-            $this->model->{$relation->name}()->createMany($changed);
-            // if ($relation->type == 'belongsTo') {
-            //     $data[$relation->related->getKeyName()] = $this->model->{$relation->related->getForeignKeyName()};
-            // }
-            // $this->model->{$relation->name}()
-            //     ->updateOrCreate(Arr::only($data, [$this->model->{$relation->name}()->getKeyName()]), $data ?? []);
+            $changed->each(function ($item) use ($keyName, $relation) {
+                $this->model->{$relation->name}()->updateOrCreate([$keyName => $item[$keyName]], $item);
+            });
         }
 
         $this->formClose();
