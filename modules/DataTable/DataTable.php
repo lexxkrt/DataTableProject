@@ -315,11 +315,9 @@ class DataTable extends Component
     private function storeHasMany(string $relation)
     {
         $keyName = app($this->class)->{$relation}()->getRelated()->getKeyName();
-
         $data = collect($this->formRelations[$relation]);
-        $original = $this->model->{$relation};
 
-        $deleted = $original->pluck($keyName)->diff($data->pluck($keyName));
+        $deleted = $this->model->{$relation}->pluck($keyName)->diff($data->pluck($keyName));
         $created = $data->whereNull($keyName);
         $changed = $data->whereNotNull($keyName);
 
