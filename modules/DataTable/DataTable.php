@@ -5,6 +5,7 @@ namespace Modules\DataTable;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -283,31 +284,28 @@ class DataTable extends Component
             Arr::has($this->formUploads, $field->name) and $formData[$field->name] = $this->formUploads[$field->name]->store($table, 'local');
         });
 
-        $this->model->updateOrCreate([$this->model->getKeyName() => $this->model->getKey()], $formData);
+        $this->model = $this->model->updateOrCreate([$this->model->getKeyName() => $this->model->getKey()], $formData);
 
         $relations = $this->getRelations($this->fields());
 
         foreach ($relations as $relation) {
-            $keyName = app($this->class)->{$relation->name}()->getRelated()->getKeyName();
+            if (app($this->class)->{$relation->name}() instanceof HasMany) {
 
-            $data = $this->formRelations[$relation->name];
-            $original = $this->model->{$relation->name}->toArray();
+                $keyName = app($this->class)->{$relation->name}()->getRelated()->getKeyName();
 
-            $ids_data = collect($data)->pluck($keyName);
-            $ids_original = collect($original)->pluck($keyName);
-            $deleted = $ids_original->diff($ids_data);
-            $created = collect($data)->whereNull('id');
-            $changed = collect($data)->whereNotNull('id');
+                $data = collect($this->formRelations[$relation->name]);
+                $original = $this->model->{$relation->name};
 
-            $this->model->{$relation->name}()->find($deleted->toArray())->each(function ($item) {
-                $item->delete();
-            });
+                $deleted = $original->pluck($keyName)->diff($data->pluck($keyName));
+                $created = $data->whereNull($keyName);
+                $changed = $data->whereNotNull($keyName);
 
-            $this->model->{$relation->name}()->createMany($created->toArray());
+                $this->model->{$relation->name}()->find($deleted->toArray())->each(fn ($item) => $item->delete());
 
-            $changed->each(function ($item) use ($keyName, $relation) {
-                $this->model->{$relation->name}()->updateOrCreate([$keyName => $item[$keyName]], $item);
-            });
+                $this->model->{$relation->name}()->createMany($created->toArray());
+
+                $changed->each(fn ($item) => $this->model->{$relation->name}()->updateOrCreate(Arr::only($item, $keyName), $item));
+            }
         }
 
         $this->formClose();
@@ -341,6 +339,10 @@ class DataTable extends Component
             return $this->model?->getImage();
         }
     }
+    public function relationImageUrl(string $field)
+    {
+        return $this->model?->{$field}?->getImage();
+    }
 
     public function formImageRemove(string $field)
     {
@@ -357,6 +359,15 @@ class DataTable extends Component
     public function removeRelation(string $relation, int $index)
     {
         unset($this->formRelations[$relation][$index]);
+    }
+
+    public function imageRelation(string $relation)
+    {
+        if(Arr::has($this->formUploads, $relation)){
+            return $this->formUploads[$relation]->temporaryUrl();
+        } else {
+            return $this->formRelations[$relation][0]['image'];
+        }
     }
 
     /* end form methods */

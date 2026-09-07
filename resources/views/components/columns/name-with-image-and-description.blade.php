@@ -1,6 +1,6 @@
 @props(['column', 'row'])
 @php
-    $image = $row->getImage();
+    $image = $row->getImage()??asset('images/no_img.jpg');
     $value = value($column->value, $row) ?? $row->{$column->name};
     // $description = $row->slug;
 @endphp

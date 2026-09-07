@@ -6,7 +6,6 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
 use Modules\DataTable\Classes\Columns\Column;
 use Modules\DataTable\Classes\Columns\ColumnImage;
 use Modules\DataTable\Classes\Columns\ColumnToggle;
@@ -20,6 +19,8 @@ use Modules\DataTable\Classes\Layouts\Grid;
 use Modules\DataTable\Classes\Layouts\Section;
 use Modules\DataTable\Classes\Layouts\Tab;
 use Modules\DataTable\Classes\Layouts\Tabs;
+use Modules\DataTable\Classes\Relations\Fields\RelationImage;
+use Modules\DataTable\Classes\Relations\Fields\RelationInput;
 use Modules\DataTable\Classes\Relations\Relation;
 use Modules\DataTable\DataTable;
 
@@ -79,8 +80,8 @@ class ProductPage extends DataTable
                 ]),
                 Tab::make('Images')->fields([
                     Relation::make('images')->fields([
-                        'image',
-                        'position',
+                        RelationImage::make('image'),
+                        RelationInput::make('position'),
                     ]),
                 ]),
             ]),
@@ -107,7 +108,7 @@ class ProductPage extends DataTable
     private function getCategories()
     {
         static $categories;
-        empty($categories) and $categories = Cache::remember('categories', 60, fn () => Category::orderBy('name')->pluck('name', 'id')->toArray());
+        empty($categories) and $categories = Category::orderBy('name')->pluck('name', 'id')->toArray();
 
         return $categories;
     }

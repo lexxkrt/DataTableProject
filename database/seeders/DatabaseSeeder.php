@@ -33,9 +33,7 @@ class DatabaseSeeder extends Seeder
                         ->each(function (Product $product) {
                             [$width, $height] = Product::make()->imageSize();
                             $product->images()->createMany(
-                                ProductImage::factory(rand(1, 3), [
-                                    'image' => fake_image_url($width, $height, $product->name),
-                                ])->sequence(fn ($sequence) => [
+                                ProductImage::factory(rand(1, 3))->sequence(fn ($sequence) => [
                                     'position' => $sequence->index,
                                 ])->make()->toArray()
                             );
