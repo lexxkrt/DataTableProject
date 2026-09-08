@@ -5,6 +5,7 @@ namespace Modules\DataTable;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Computed;
@@ -291,25 +292,27 @@ class DataTable extends Component
         foreach ($relations as $relation) {
             if (app($this->class)->{$relation->name}() instanceof HasMany) {
                 $this->storeHasMany($relation->name);
-
-                // $keyName = app($this->class)->{$relation->name}()->getRelated()->getKeyName();
-
-                // $data = collect($this->formRelations[$relation->name]);
-                // $original = $this->model->{$relation->name};
-
-                // $deleted = $original->pluck($keyName)->diff($data->pluck($keyName));
-                // $created = $data->whereNull($keyName);
-                // $changed = $data->whereNotNull($keyName);
-
-                // $this->model->{$relation->name}()->find($deleted->toArray())->each(fn ($item) => $item->delete());
-
-                // $this->model->{$relation->name}()->createMany($created->toArray());
-
-                // $changed->each(fn ($item) => $this->model->{$relation->name}()->updateOrCreate(Arr::only($item, $keyName), $item));
+            } elseif (app($this->class)->{$relation->name}() instanceof BelongsToMany) {
+                $this->storeBelongsToMany($relation->name);
             }
         }
 
         $this->formClose();
+    }
+
+    private function storeBelongsToMany(string $relation)
+    {
+        $foreignKeyName = app($this->class)->{$relation}()->getForeignPivotKeyName(); // product_id
+        $relatedKeyName = app($this->class)->{$relation}()->getRelatedPivotKeyName(); // property_id
+
+        $data = collect($this->formRelations[$relation])
+            ->mapWithKeys(fn ($item) => [$item[$relatedKeyName] => Arr::except($item, [$foreignKeyName, $relatedKeyName])]);
+
+        // dd($this->model, $data);
+        // $related = $this->model->{$relation}();
+        // dd($related);
+        // $related->sync($data);
+        $this->model->{$relation}()->sync($data);
     }
 
     private function storeHasMany(string $relation)
@@ -333,9 +336,15 @@ class DataTable extends Component
     {
         $this->formData = $this->model->toArray();
         $this->formUploads = [];
+        $this->formRelations = [];
         foreach ($this->getRelations($this->fields()) as $relation) {
-            $this->formRelations[$relation->name] = $this->model?->{$relation->name}->toArray();
+            if ($this->model->{$relation->name}() instanceof BelongsToMany) {
+                $this->formRelations[$relation->name] = $this->model?->{$relation->name}->pluck('pivot')->toArray();
+            } elseif ($this->model->{$relation->name}() instanceof HasMany) {
+                $this->formRelations[$relation->name] = $this->model?->{$relation->name}->toArray();
+            }
         }
+        // dd($this->formRelations);
         $this->formShow = true;
     }
 

@@ -6,6 +6,7 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Models\Property;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -26,6 +27,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Brand::factory(10)->create();
+        Property::factory(100)->create();
         Category::factory(3)->create()->each(function (Category $category) {
             Category::factory(3, ['parent_id' => $category->id])->create()->each(function (Category $category) {
                 Category::factory(3, ['parent_id' => $category->id])->create()->each(function (Category $category) {
@@ -38,8 +40,20 @@ class DatabaseSeeder extends Seeder
                                 ])->make()->toArray()
                             );
                             // product attributes
+                            // $product->properties()->attach(Property::inRandomOrder()->random(rand(1, 3)));
                             // product filters
                         });
+                    $properties = Property::inRandomOrder()->take(rand(3, 5))->get();
+                    $category->products()->each(function (Product $product) use ($properties) {
+                        $product_properties = [];
+                        foreach ($properties as $key => $property) {
+                            $product_properties[$property->id] = [
+                                'value' => fake()->word(),
+                                'position' => $key,
+                            ];
+                        }
+                        $product->properties()->sync($product_properties);
+                    });
                 });
             });
         });

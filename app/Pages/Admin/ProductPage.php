@@ -5,6 +5,7 @@ namespace App\Pages\Admin;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Property;
 use Illuminate\Database\Eloquent\Model;
 use Modules\DataTable\Classes\Columns\Column;
 use Modules\DataTable\Classes\Columns\ColumnImage;
@@ -21,6 +22,7 @@ use Modules\DataTable\Classes\Layouts\Tab;
 use Modules\DataTable\Classes\Layouts\Tabs;
 use Modules\DataTable\Classes\Relations\Fields\RelationImage;
 use Modules\DataTable\Classes\Relations\Fields\RelationInput;
+use Modules\DataTable\Classes\Relations\Fields\RelationSelect;
 use Modules\DataTable\Classes\Relations\Relation;
 use Modules\DataTable\DataTable;
 
@@ -84,6 +86,13 @@ class ProductPage extends DataTable
                         RelationInput::make('position'),
                     ]),
                 ]),
+                Tab::make('Properties')->fields([
+                    Relation::make('properties')->fields([
+                        RelationSelect::make('property_id', 'Property')->options($this->getProperties()),
+                        RelationInput::make('value'),
+                        RelationInput::make('position'),
+                    ]),
+                ]),
             ]),
         ];
     }
@@ -111,5 +120,13 @@ class ProductPage extends DataTable
         empty($categories) and $categories = Category::orderBy('name')->pluck('name', 'id')->toArray();
 
         return $categories;
+    }
+
+    private function getProperties()
+    {
+        static $properties;
+        empty($properties) and $properties = Property::orderBy('name')->pluck('name', 'id')->toArray();
+
+        return $properties;
     }
 }
