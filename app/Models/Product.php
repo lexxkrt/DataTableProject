@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Casts\MoneyCast;
+use App\Models\ProductProperty;
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

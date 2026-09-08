@@ -147,7 +147,6 @@ class DataTable extends Component
         if ($field) {
             $query->orderBy($this->getFieldName($field->name), $this->sortDirection);
         }
-        // $query->dumpRawSql();
 
         if ($this->withoutPagination) {
             return $query->get();
@@ -271,7 +270,6 @@ class DataTable extends Component
         $files = collect($fields)->filter(fn ($field) => $field->type == 'file');
 
         $rules = collect($fields)->mapWithKeys(fn ($field) => [$field->key => $field->rules])->toArray();
-        // $messages = collect($fields)->mapWithKeys(fn ($field) => [$field->key => $field->messages])->toArray();
         $attributes = collect($fields)->mapWithKeys(fn ($field) => [$field->key => trans($field->label)])->toArray();
 
         $validated = $this->validate($rules, [], $attributes);
@@ -306,12 +304,9 @@ class DataTable extends Component
         $relatedKeyName = app($this->class)->{$relation}()->getRelatedPivotKeyName(); // property_id
 
         $data = collect($this->formRelations[$relation])
-            ->mapWithKeys(fn ($item) => [$item[$relatedKeyName] => Arr::except($item, [$foreignKeyName, $relatedKeyName])]);
+            ->where(fn ($item) => isset($item[$relatedKeyName]))
+            ->mapWithKeys(fn ($item) => [$item[$relatedKeyName] => $item]);
 
-        // dd($this->model, $data);
-        // $related = $this->model->{$relation}();
-        // dd($related);
-        // $related->sync($data);
         $this->model->{$relation}()->sync($data);
     }
 
@@ -320,13 +315,9 @@ class DataTable extends Component
         $keyName = app($this->class)->{$relation}()->getRelated()->getKeyName();
         $data = collect($this->formRelations[$relation]);
 
-        $deleted = $this->model->{$relation}->pluck($keyName)->diff($data->pluck($keyName));
-        $created = $data->whereNull($keyName);
-        $changed = $data->whereNotNull($keyName);
-
-        $this->model->{$relation}()->find($deleted->toArray())->each(fn ($item) => $item->delete());
-        $this->model->{$relation}()->createMany($created->toArray());
-        $changed->each(fn ($item) => $this->model->{$relation}()->updateOrCreate(Arr::only($item, $keyName), $item));
+        $this->model->{$relation}()->whereNotIn($keyName, $data->pluck($keyName))->delete();
+        $this->model->{$relation}()->createMany($data->whereNull($keyName)->toArray());
+        $data->whereNotNull($keyName)->each(fn ($item) => $this->model->{$relation}()->updateOrCreate(Arr::only($item, $keyName), $item));
     }
 
     /* form methods */
@@ -344,7 +335,6 @@ class DataTable extends Component
                 $this->formRelations[$relation->name] = $this->model?->{$relation->name}->toArray();
             }
         }
-        // dd($this->formRelations);
         $this->formShow = true;
     }
 

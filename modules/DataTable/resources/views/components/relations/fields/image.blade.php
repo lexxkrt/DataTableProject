@@ -1,10 +1,10 @@
 @use('App\Services\ImageService')
 @props(['relation', 'key', 'column'])
-@php
+@php    
     if (Arr::has($this->formUploads, $relation . '.' . $key . '.' . $column->name)) {
         $src = $this->formUploads[$relation . '.' . $key . '.' . $column->name]->temporaryUrl();
     } else {
-        $src = $this->formRelations[$relation][$key][$column->name];
+        $src = $this->formRelations[$relation][$key][$column->name]??'';
         $src = new ImageService()->getImage($src, 'small');
     }
     $placeholder = asset('images/no_img.jpg');

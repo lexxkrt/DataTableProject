@@ -23,7 +23,7 @@ trait HasImage
             $model->deleteImage();
         });
         static::created(function (Model $model) {
-            if ($model->isDirty($model->imageSource())) {
+            if ($model->isDirty($model->imageSource()) && filled($model->getOriginal($model->imageSource()))) {
                 $model->storeImage();
             }
 
