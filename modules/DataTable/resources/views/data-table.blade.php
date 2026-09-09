@@ -37,52 +37,8 @@
             </div>
         </div>
         <div class="max-w-full overflow-x-auto">
-        <table>
-            <thead>
-                <tr>
-                    @foreach ($this->columns() as $column)
-                        @php
-                            $align = match ($column->align) {
-                                'left' => 'text-start',
-                                'center' => 'text-center',
-                                'right' => 'text-right',
-                                default => $column->align,
-                            };
-                        @endphp
-                        <th @class([$align, $column->width, 'hidden' => $column->hidden])>
-                            @if ($column->sortable)
-                                <a wire:click="sortBy('{{ $column->name }}')" class="inline-flex items-center gap-1 text-nowrap">
-                                    @if ($column->name === $this->sortField)
-                                        @if ($this->sortDirection === 'asc')
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                                            </svg>
-                                        @else
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
-                                            </svg>
-                                        @endif
-                                    @else
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
-                                        </svg>
-                                    @endif
-                                    {{ __($column->label) }}
-                                </a>
-                            @else
-                                <span class="inline-flex items-center text-nowrap">
-                                    {{ __($column->label) }}
-                                </span>
-                            @endif
-                        </th>
-                    @endforeach
-                    @if ($this->actions())
-                        <th class="w-20">{{ __('Actions') }}</th>
-                    @endif
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($this->data as $row)
+            <table>
+                <thead>
                     <tr>
                         @foreach ($this->columns() as $column)
                             @php
@@ -93,25 +49,69 @@
                                     default => $column->align,
                                 };
                             @endphp
-                            <td @class([$align, $column->width, 'hidden' => $column->hidden])><x-dynamic-component :component="$column->view" :$column :$row /></td>
+                            <th @class([$align, $column->width, 'hidden' => $column->hidden])>
+                                @if ($column->sortable)
+                                    <a wire:click="sortBy('{{ $column->name }}')" class="inline-flex items-center gap-1 text-nowrap">
+                                        @if ($column->name === $this->sortField)
+                                            @if ($this->sortDirection === 'asc')
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                                </svg>
+                                            @else
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                                                </svg>
+                                            @endif
+                                        @else
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                                            </svg>
+                                        @endif
+                                        {{ __($column->label) }}
+                                    </a>
+                                @else
+                                    <span class="inline-flex items-center text-nowrap">
+                                        {{ __($column->label) }}
+                                    </span>
+                                @endif
+                            </th>
                         @endforeach
                         @if ($this->actions())
-                            <td class="w-20">
-                                <div class="inline-flex items-center gap-2">
-                                    @foreach ($this->actions() as $action)
-                                        <x-dynamic-component :component="$action->view" :$action :$row />
-                                    @endforeach
-                                </div>
-                            </td>
+                            <th class="w-20">{{ __('Actions') }}</th>
                         @endif
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="{{ count($this->columns()) + ($this->actions() ? 1 : 0) }}" class="text-center">{{ __('No data found') }}</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @forelse ($this->data as $row)
+                        <tr>
+                            @foreach ($this->columns() as $column)
+                                @php
+                                    $align = match ($column->align) {
+                                        'left' => 'text-start',
+                                        'center' => 'text-center',
+                                        'right' => 'text-right',
+                                        default => $column->align,
+                                    };
+                                @endphp
+                                <td @class([$align, $column->width, 'hidden' => $column->hidden])><x-dynamic-component :component="$column->view" :$column :$row /></td>
+                            @endforeach
+                            @if ($this->actions())
+                                <td class="w-20">
+                                    <div class="inline-flex items-center gap-2">
+                                        @foreach ($this->actions() as $action)
+                                            <x-dynamic-component :component="$action->view" :$action :$row />
+                                        @endforeach
+                                    </div>
+                                </td>
+                            @endif
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="{{ count($this->columns()) + ($this->actions() ? 1 : 0) }}" class="text-center">{{ __('No data found') }}</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
         @if ($this->data instanceof Illuminate\Pagination\LengthAwarePaginator)
             <div class="">
@@ -120,6 +120,6 @@
         @endif
     </div>
     @teleport('#modal')
-        @include('data-table::form')
+        @include($this->formView())
     @endteleport
 </div>

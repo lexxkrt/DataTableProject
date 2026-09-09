@@ -15,3 +15,12 @@
 body {
     @apply bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 flex flex-col min-h-screen;
 }
+
+a,
+button {
+    @apply cursor-pointer;
+}
+
+aside {
+    @apply bg-gray-700 dark:bg-gray-900 text-gray-200 dark:text-gray-200;
+}

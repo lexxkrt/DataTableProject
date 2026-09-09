@@ -10,3 +10,8 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    @apply w-full border border-gray-400 bg-white p-2 rounded-lg dark:bg-gray-800 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-gray-700 dark:text-gray-300;
+}

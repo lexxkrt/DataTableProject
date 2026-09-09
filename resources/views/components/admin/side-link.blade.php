@@ -1,20 +1,14 @@
-@props(['route', 'title'])
-<a href="{{ route($route) }}" class="inline-flex items-center gap-2 mb-2" title="{{ __($title) }}" wire:navigate>
-    @if ($slot->isNotEmpty())
-        {{ $slot }}
-    @else
-        @php
-            $icon = str($title)->substr(0, 2)->upper()->value();
-        @endphp
-        <span class="size-8 flex items-center justify-center bg-white/10 rounded-lg border border-gray-500">
-            {{ $icon }}
-        </span>
-        {{-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M3 8.25V18a2.25 2.25 0 0 0 2.25 2.25h13.5A2.25 2.25 0 0 0 21 18V8.25m-18 0V6a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 6v2.25m-18 0h18M5.25 6h.008v.008H5.25V6ZM7.5 6h.008v.008H7.5V6Zm2.25 0h.008v.008H9.75V6Z" />
-        </svg> --}}
-        <span x-show="sidebarCollapsed">
-            {{ __($title) }}
-        </span>
-    @endif
-</a>
+@props(['route', 'title', 'icon' => ''])
+@php
+    empty($icon) and ($icon = str($title)->substr(0, 2)->upper()->value());
+    $active = request()->routeIs($route);
+@endphp
+<li><a href="{{ route($route) }}" @class([
+    'flex items-center gap-2',
+    'hover:bg-gray-600 dark:hover:bg-gray-800',
+    'bg-gray-600 dark:bg-gray-800' => $active,
+]) title="{{ __($title) }}" wire:navigate>
+        <span class="flex size-8 items-center justify-center overflow-hidden rounded-lg border border-gray-500 bg-white/10">{{ $icon }}</span>
+        {{ __($title) }}
+    </a>
+</li>

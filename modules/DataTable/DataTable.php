@@ -18,6 +18,7 @@ use Modules\DataTable\Classes\Actions\Action;
 use Modules\DataTable\Classes\Columns\Column;
 use Modules\DataTable\Classes\Fields\Field;
 use Modules\DataTable\Classes\Layouts\Tabs;
+use Modules\DataTable\Classes\Relations\Fields\RelationImage;
 use Modules\DataTable\Classes\Relations\Relation;
 
 class DataTable extends Component
@@ -119,7 +120,7 @@ class DataTable extends Component
     }
 
     #[Computed]
-    public function data()
+    public function data(): mixed
     {
         $query = $this->query();
         $query->select($this->getTable().'.*');
@@ -262,7 +263,7 @@ class DataTable extends Component
         return $results;
     }
 
-    public function store()
+    public function store(): void
     {
         $this->resetValidation();
         $fields = $this->getFields($this->fields());
@@ -271,6 +272,15 @@ class DataTable extends Component
 
         $rules = collect($fields)->mapWithKeys(fn ($field) => [$field->key => $field->rules])->toArray();
         $attributes = collect($fields)->mapWithKeys(fn ($field) => [$field->key => trans($field->label)])->toArray();
+
+        $relations = $this->getRelations($this->fields());
+        foreach ($relations as $relation) {
+            foreach ($relation->fields as $field) {
+                $key = 'formRelations'.'.'.$relation->name.'.*.'.$field->name;
+                $rules[$key] = $field->rules;
+                $attributes[$key] = trans($field->label);
+            }
+        }
 
         $validated = $this->validate($rules, [], $attributes);
 
@@ -285,9 +295,25 @@ class DataTable extends Component
 
         $this->model = $this->model->updateOrCreate([$this->model->getKeyName() => $this->model->getKey()], $formData);
 
-        $relations = $this->getRelations($this->fields());
-
         foreach ($relations as $relation) {
+            collect($relation->fields)
+                ->where(fn ($field) => $field instanceof RelationImage)
+                ->each(function ($field) use ($relation) {
+                    // dump($this->formRelations[$relation->name]);
+                    foreach ($this->formRelations[$relation->name] as $key => $value) {
+                        $index = "{$relation->name}_{$key}_{$field->name}";
+                        $table = $this->model->getTable();
+                        // dump($index, $this->formUploads);
+                        if (Arr::has($this->formUploads, $index)) {
+                            // dump($this->formUploads[$index]);
+                            $file = $this->formUploads[$index]->store($table, 'local');
+                            $this->formRelations[$relation->name][$key][$field->name] = $file;
+                            // dump($this->formRelations[$relation->name]);
+                        }
+                    }
+                    // $this->formUploads[$field->name]->store($table, 'local');
+                    // dd($field, $relation);
+                });
             if (app($this->class)->{$relation->name}() instanceof HasMany) {
                 $this->storeHasMany($relation->name);
             } elseif (app($this->class)->{$relation->name}() instanceof BelongsToMany) {
@@ -298,7 +324,18 @@ class DataTable extends Component
         $this->formClose();
     }
 
-    private function storeBelongsToMany(string $relation)
+    private function storeImage($field)
+    {
+        $table = app($this->class)->getTable();
+
+        $files->each(function ($field) use (&$formData, $table) {
+            Arr::has($this->formData, $field->name) && blank($this->formData[$field->name]) and $formData[$field->name] = null;
+            Arr::has($this->formUploads, $field->name) and $formData[$field->name] = $this->formUploads[$field->name]->store($table, 'local');
+        });
+
+    }
+
+    private function storeBelongsToMany(string $relation): void
     {
         $foreignKeyName = app($this->class)->{$relation}()->getForeignPivotKeyName(); // product_id
         $relatedKeyName = app($this->class)->{$relation}()->getRelatedPivotKeyName(); // property_id
@@ -310,7 +347,7 @@ class DataTable extends Component
         $this->model->{$relation}()->sync($data);
     }
 
-    private function storeHasMany(string $relation)
+    private function storeHasMany(string $relation): void
     {
         $keyName = app($this->class)->{$relation}()->getRelated()->getKeyName();
         $data = collect($this->formRelations[$relation]);
@@ -323,7 +360,7 @@ class DataTable extends Component
     /* form methods */
 
     #[On('formOpen')]
-    public function formOpen()
+    public function formOpen(): void
     {
         $this->formData = $this->model->toArray();
         $this->formUploads = [];
@@ -331,6 +368,7 @@ class DataTable extends Component
         foreach ($this->getRelations($this->fields()) as $relation) {
             if ($this->model->{$relation->name}() instanceof BelongsToMany) {
                 $this->formRelations[$relation->name] = $this->model?->{$relation->name}->pluck('pivot')->toArray();
+                // empty($this->formRelations[$relation->name]) and $this->formRelations[$relation->name] =
             } elseif ($this->model->{$relation->name}() instanceof HasMany) {
                 $this->formRelations[$relation->name] = $this->model?->{$relation->name}->toArray();
             }
@@ -339,7 +377,7 @@ class DataTable extends Component
     }
 
     #[On('formClose')]
-    public function formClose()
+    public function formClose(): void
     {
         $this->resetValidation();
         $this->reset(['formData', 'formUploads', 'formShow', 'model']);
@@ -391,6 +429,11 @@ class DataTable extends Component
     // {
     //     return 'data-table::pagination';
     // }
+
+    public function formView()
+    {
+        return 'data-table::form';
+    }
 
     #[Layout('layouts::admin')]
     public function render()

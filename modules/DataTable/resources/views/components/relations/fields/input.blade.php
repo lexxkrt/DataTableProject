@@ -1,3 +1,11 @@
 @props(['relation', 'key', 'column'])
-<input wire:model="formRelations.{{ $relation }}.{{ $key }}.{{ $column->name }}"
-       type="text" class="border border-gray-300 p-2">
+@php
+    $key = "formRelations.{$relation}.{$key}.{$column->name}";
+@endphp
+<div class="flex w-full flex-col items-start">
+    <input wire:model="{{ $key }}"
+           type="text" @class(['error' => $errors->has($key)])>
+    @error($key)
+        <span class="text-sm text-red-500 dark:text-red-50">{{ $message }}</span>
+    @enderror
+</div>

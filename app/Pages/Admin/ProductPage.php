@@ -32,7 +32,7 @@ class ProductPage extends DataTable
 
     public string $sortField = 'name';
 
-    public string $formSize = 'max-w-xl';
+    public string $formSize = 'max-w-5xl';
 
     public function columns(): array
     {
@@ -63,18 +63,17 @@ class ProductPage extends DataTable
                             FieldImage::make('image'),
                         ])->css('shrink-0')->bordered(),
                         Section::make()->fields([
-                            Field::make('name'),
-                            // Field::make('slug'),
+                            Field::make('name')->rules('required|string|max:255'),
                             Section::make()->fields([
                                 FieldSelect::make('brand_id', 'Brand')->options($this->getBrands()),
                                 FieldSelect::make('category_id', 'Category')->options($this->getCategories()),
                             ])->bordered(),
                             Grid::make()->fields([
-                                Field::make('quantity'),
-                                Field::make('price'),
+                                Field::make('quantity')->rules('required|integer'),
+                                Field::make('price')->rules('required|numeric'),
                             ]),
                             Grid::make()->fields([
-                                Field::make('position'),
+                                Field::make('position')->rules('required|integer'),
                             ]),
                             FieldToggle::make('status'),
                         ])->css('grow')->bordered(),
@@ -83,14 +82,15 @@ class ProductPage extends DataTable
                 Tab::make('Images')->fields([
                     Relation::make('images')->fields([
                         RelationImage::make('image'),
-                        RelationInput::make('position'),
+                        RelationInput::make('position')->rules('required|integer'),
                     ]),
                 ]),
                 Tab::make('Properties')->fields([
                     Relation::make('properties')->fields([
-                        RelationSelect::make('property_id', 'Property')->options($this->getProperties()),
-                        RelationInput::make('value'),
-                        RelationInput::make('position'),
+                        RelationSelect::make('property_id', 'Property')
+                            ->options($this->getProperties())->rules('required'),
+                        RelationInput::make('value')->rules('required|string|max:255'),
+                        RelationInput::make('position')->rules('required|integer')->width('w-20'),
                     ]),
                 ]),
             ]),

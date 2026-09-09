@@ -15,6 +15,8 @@
            placeholder="{{ __($placeholder) }}..."
            wire:model="{{ $field->key }}">
     @error($field->key)
-        <span class="text-sm text-red-500">{{ $message }}</span>
+    <div class="">
+        <span class="text-sm text-red-500 dark:text-red-50">{{ $message }}</span>
+    </div>
     @enderror
 </div>
