@@ -38,7 +38,7 @@ class ProductPage extends DataTable
     {
         return [
             Column::make('id')->width('w-12')->center()->sortable()->searchable()->hidden(),
-            // ColumnImage::make('image')->width('w-12')->center()->value(fn (Model $row) => $row->getImage()),
+            ColumnImage::make('image')->width('w-12')->center()->value(fn (Model $row) => $row->getImage()),
             Column::make('name')->sortable()->searchable()->view('columns.name-with-image-and-description'),
             // Column::make('description')->sortable()->searchable(),
             // Column::make('slug')->sortable()->searchable(),
