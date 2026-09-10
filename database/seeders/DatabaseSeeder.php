@@ -44,16 +44,22 @@ class DatabaseSeeder extends Seeder
                             // product filters
                         });
                     $properties = Property::inRandomOrder()->take(rand(3, 5))->get();
+                    $props = $properties->mapWithKeys(fn ($property, $index) => [$property->id => ['position' => $index]]);
+                    $category->properties()->sync($props);
                     $category->products()->each(function (Product $product) use ($properties) {
-                        $product_properties = [];
-                        foreach ($properties as $key => $property) {
-                            $product_properties[$property->id] = [
-                                'value' => fake()->word(),
-                                'position' => $key,
-                            ];
-                        }
-                        $product->properties()->sync($product_properties);
+                        $props = $properties->mapWithKeys(fn ($property, $index) => [$property->id => ['position' => $index, 'value' => fake()->word()]]);
+                        $product->properties()->sync($props);
                     });
+                    // $category->products()->each(function (Product $product) use ($properties) {
+                    //     $product_properties = [];
+                    //     foreach ($properties as $key => $property) {
+                    //         $product_properties[$property->id] = [
+                    //             'value' => fake()->word(),
+                    //             'position' => $key,
+                    //         ];
+                    //     }
+                    //     $product->properties()->sync($product_properties);
+                    // });
                 });
             });
         });

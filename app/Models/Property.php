@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\ProductProperty;
 use Database\Factories\PropertyFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,5 +21,11 @@ class Property extends Model
     {
         return $this->belongsToMany(Product::class, 'product_property')
             ->withPivot(['value', 'position']);
+    }
+
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class, 'category_property')
+            ->withPivot(['position']);
     }
 }

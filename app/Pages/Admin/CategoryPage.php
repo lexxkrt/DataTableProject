@@ -3,6 +3,7 @@
 namespace App\Pages\Admin;
 
 use App\Models\Category;
+use App\Models\Property;
 use Illuminate\Database\Eloquent\Model;
 use Modules\DataTable\Classes\Columns\Column;
 use Modules\DataTable\Classes\Columns\ColumnImage;
@@ -14,6 +15,11 @@ use Modules\DataTable\Classes\Filters\Filter;
 use Modules\DataTable\Classes\Layouts\Flex;
 use Modules\DataTable\Classes\Layouts\Grid;
 use Modules\DataTable\Classes\Layouts\Section;
+use Modules\DataTable\Classes\Layouts\Tab;
+use Modules\DataTable\Classes\Layouts\Tabs;
+use Modules\DataTable\Classes\Relations\Fields\RelationInput;
+use Modules\DataTable\Classes\Relations\Fields\RelationSelect;
+use Modules\DataTable\Classes\Relations\Relation;
 use Modules\DataTable\DataTable;
 
 class CategoryPage extends DataTable
@@ -40,19 +46,29 @@ class CategoryPage extends DataTable
     public function fields(): array
     {
         return [
-            Flex::make()->fields([
-                Section::make()->fields([
-                    FieldImage::make('image'),
-                ])->css('shrink-0')->bordered(),
-                Section::make()->fields([
-                    Field::make('name'),
-                    FieldSelect::make('parent_id', 'Parent')->options(Category::whereHas('children')->pluck('name', 'id')->toArray()),
-                    // Field::make('slug'),
-                    Grid::make()->fields([
-                        Field::make('status'),
-                        Field::make('position'),
+            Tabs::make()->tabs([
+                Tab::make('General')->fields([
+                    Flex::make()->fields([
+                        Section::make()->fields([
+                            FieldImage::make('image'),
+                        ])->css('shrink-0')->bordered(),
+                        Section::make()->fields([
+                            Field::make('name'),
+                            FieldSelect::make('parent_id', 'Parent')->options(Category::whereHas('children')->pluck('name', 'id')->toArray()),
+                            Grid::make()->fields([
+                                Field::make('status'),
+                                Field::make('position'),
+                            ]),
+                        ])->css('grow')->bordered(),
                     ]),
-                ])->css('grow')->bordered(),
+                ]),
+                Tab::make('Properties')->fields([
+                    Relation::make('properties')->fields([
+                        RelationSelect::make('property_id', 'Property')
+                            ->options($this->getProperties())->rules('required'),
+                        RelationInput::make('position')->rules('required|integer')->width('w-20'),
+                    ]),
+                ]),
             ]),
         ];
     }
@@ -63,5 +79,13 @@ class CategoryPage extends DataTable
             Filter::make('status')->options(['1' => 'Enabled', '0' => 'Disabled']),
             Filter::make('parent_id', 'Parent')->options(Category::whereHas('children')->pluck('name', 'id')->toArray()),
         ];
+    }
+
+    private function getProperties()
+    {
+        static $properties;
+        empty($properties) and $properties = Property::orderBy('name')->pluck('name', 'id')->toArray();
+
+        return $properties;
     }
 }

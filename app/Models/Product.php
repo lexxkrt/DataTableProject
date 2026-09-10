@@ -63,6 +63,6 @@ class Product extends Model
     public function properties(): BelongsToMany
     {
         return $this->belongsToMany(Property::class, 'product_property')
-            ->withPivot(['value', 'position']);
+            ->withPivot(['value', 'position'])->orderByPivot('position');
     }
 }

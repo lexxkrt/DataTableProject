@@ -13,6 +13,11 @@
     "Categories": "Категории",
     "Product": "Товар",
     "Products": "Товары",
+    "Property": "Свойство",
+    "Properties": "Свойства",
+    "Value": "Значение",
+    "Values": "Значения",
+    "General": "Общие",
     "Id": "Ид",
     "Image": "Картинка",
     "Name": "Название",
@@ -33,6 +38,17 @@
     "All": "Все",
     "Enabled": "Включено",
     "Disabled": "Отключено",
-    "Are you sure?": "Вы уверены?"
-
+    "Are you sure?": "Вы уверены?",
+    "Yes": "Да",
+    "No": "Нет",
+    "Confirm": "Подтвердить",
+    "Login": "Вход",
+    "Logout": "Выход",
+    "E-mail": "Электронная почта",
+    "Password": "Пароль",
+    "Remember": "Запомнить меня",
+    "Forgot your password?": "Забыли пароль?",
+    "Register": "Регистрация",
+    "Confirm password": "Подтвердить пароль",
+    "Reset password": "Сбросить пароль"
 }

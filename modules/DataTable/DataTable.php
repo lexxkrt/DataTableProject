@@ -266,17 +266,19 @@ class DataTable extends Component
     public function store(): void
     {
         $this->resetValidation();
-        $fields = $this->getFields($this->fields());
-        $inputs = collect($fields)->filter(fn ($field) => $field->type != 'file');
-        $files = collect($fields)->filter(fn ($field) => $field->type == 'file');
 
-        $rules = collect($fields)->mapWithKeys(fn ($field) => [$field->key => $field->rules])->toArray();
-        $attributes = collect($fields)->mapWithKeys(fn ($field) => [$field->key => trans($field->label)])->toArray();
+        $fields = collect($this->getFields($this->fields()));
+        $inputs = $fields->filter(fn ($field) => $field->type != 'file');
+        $files = $fields->filter(fn ($field) => $field->type == 'file');
+
+        $rules = $fields->mapWithKeys(fn ($field) => [$field->key => $field->rules])->toArray();
+        $attributes = $fields->mapWithKeys(fn ($field) => [$field->key => trans($field->label)])->toArray();
 
         $relations = $this->getRelations($this->fields());
+
         foreach ($relations as $relation) {
             foreach ($relation->fields as $field) {
-                $key = 'formRelations'.'.'.$relation->name.'.*.'.$field->name;
+                $key = "formRelations.{$relation->name}.{$field->name}";
                 $rules[$key] = $field->rules;
                 $attributes[$key] = trans($field->label);
             }
@@ -296,24 +298,9 @@ class DataTable extends Component
         $this->model = $this->model->updateOrCreate([$this->model->getKeyName() => $this->model->getKey()], $formData);
 
         foreach ($relations as $relation) {
-            collect($relation->fields)
-                ->where(fn ($field) => $field instanceof RelationImage)
-                ->each(function ($field) use ($relation) {
-                    // dump($this->formRelations[$relation->name]);
-                    foreach ($this->formRelations[$relation->name] as $key => $value) {
-                        $index = "{$relation->name}_{$key}_{$field->name}";
-                        $table = $this->model->getTable();
-                        // dump($index, $this->formUploads);
-                        if (Arr::has($this->formUploads, $index)) {
-                            // dump($this->formUploads[$index]);
-                            $file = $this->formUploads[$index]->store($table, 'local');
-                            $this->formRelations[$relation->name][$key][$field->name] = $file;
-                            // dump($this->formRelations[$relation->name]);
-                        }
-                    }
-                    // $this->formUploads[$field->name]->store($table, 'local');
-                    // dd($field, $relation);
-                });
+
+            $this->storeRelatedTableImage($relation);
+
             if (app($this->class)->{$relation->name}() instanceof HasMany) {
                 $this->storeHasMany($relation->name);
             } elseif (app($this->class)->{$relation->name}() instanceof BelongsToMany) {
@@ -324,15 +311,22 @@ class DataTable extends Component
         $this->formClose();
     }
 
-    private function storeImage($field)
+    private function storeRelatedTableImage(Relation $relation): void
     {
         $table = app($this->class)->getTable();
-
-        $files->each(function ($field) use (&$formData, $table) {
-            Arr::has($this->formData, $field->name) && blank($this->formData[$field->name]) and $formData[$field->name] = null;
-            Arr::has($this->formUploads, $field->name) and $formData[$field->name] = $this->formUploads[$field->name]->store($table, 'local');
-        });
-
+        if (isset($relation->fields)) {
+            collect($relation->fields)
+                ->where(fn ($field) => $field instanceof RelationImage)
+                ->each(function ($field) use ($relation, $table) {
+                    foreach (array_keys($this->formRelations[$relation->name]) as $key) {
+                        $index = "{$relation->name}_{$key}_{$field->name}";
+                        if (Arr::has($this->formUploads, $index)) {
+                            $file = $this->formUploads[$index]->store($table, 'local');
+                            $this->formRelations[$relation->name][$key][$field->name] = $file;
+                        }
+                    }
+                });
+        }
     }
 
     private function storeBelongsToMany(string $relation): void

@@ -19,13 +19,13 @@ class Category extends Model
     use HasFactory;
 
     use HasImage;
+    use HasNullable;
     use HasSlug;
     use HasUuid;
-    use HasNullable;
-
     use ModelChangeLogger;
 
     protected $nullable = ['parent_id'];
+
     protected $casts = [
         'status' => 'boolean',
     ];
@@ -48,5 +48,11 @@ class Category extends Model
     public function products()
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function properties()
+    {
+        return $this->belongsToMany(Property::class, 'category_property')
+            ->withPivot('position')->orderByPivot('position');
     }
 }
