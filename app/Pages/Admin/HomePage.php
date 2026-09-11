@@ -18,6 +18,8 @@ class HomePage extends Component
 
     public $brand = null;
 
+    public $multiselect = [];
+
     #[On('selectProduct')]
     public function selectProduct($id)
     {
@@ -40,6 +42,12 @@ class HomePage extends Component
         $brand = Brand::find($id);
         $this->brand = $brand;
         // dump($category);
+    }
+
+    #[On('multiselect')]
+    public function multiselect($name, $keys)
+    {
+        $this->multiselect[$name] = $keys;
     }
 
     public function render()
